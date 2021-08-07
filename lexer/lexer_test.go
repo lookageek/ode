@@ -17,7 +17,7 @@ let result = add(five, ten);
    `
 
 	tests := []struct {
-		expectedType token.TokenType
+		expectedType    token.TokenType
 		expectedLiteral string
 	}{
 		{token.LET, "let"},
