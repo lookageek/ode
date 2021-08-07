@@ -25,6 +25,10 @@ const (
 	IF          = "IF"
 	TRUE        = "TRUE"
 	FALSE       = "FALSE"
+	ELSE        = "ELSE"
+	RETURN      = "RETURN"
+	EQ          = "=="
+	NOTEQ       = "!="
 )
 
 type TokenType string
@@ -38,8 +42,13 @@ type Token struct {
 }
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"if":     IF,
+	"else":   ELSE,
+	"true":   TRUE,
+	"false":  FALSE,
+	"return": RETURN,
 }
 
 // LookupIdent determines if the identifier is a keyword or a
