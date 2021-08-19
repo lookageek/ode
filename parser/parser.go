@@ -7,18 +7,41 @@ import (
 	"lookageek.com/ode/token"
 )
 
+const (
+	_ int = iota
+	LOWEST
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+)
+
 // Parser has a reference to the lexer
 // curToken and peekToken holds the current token and the
 // next token
 // sometimes we will have to look two tokens at once to determine
 // the proper parsing, for example with statement `5;` we need to see 5 and
-// the semicolon to determine if `5` does not start off an Expression
+// the semicolon to determine if `5` does not start off an ast.Expression
 type Parser struct {
 	l         *lexer.Lexer
 	curToken  token.Token
 	peekToken token.Token
 	errors    []string
+	// map to hold onto parse functions based on token.TokenType to be called
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
+
+// defining a type for PrattParser which has per token two
+// parse functions - prefix parse and infix parse
+type (
+	prefixParseFn func() ast.Expression
+	// infix takes an argument of ast.Expression which is the "left" side of
+	// infix operation
+	infixParseFn func(ast.Expression) ast.Expression
+)
 
 // New initialises the Parser with a provided lexer,
 // calls nextToken twice to set up curToken and peekToken
@@ -26,10 +49,17 @@ type Parser struct {
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{l: l, errors: []string{}}
 
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 // nextToken moves the curToken and peekToken properly through
@@ -41,7 +71,7 @@ func (p *Parser) nextToken() {
 
 // ParseProgram walks through the token sequence in the lexer
 // and process the tokens that constitute a statement and once a
-// statement has been processed, adds to Program#Statements array
+// statement has been processed, adds to ast.Program#Statements array
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -66,7 +96,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -109,6 +139,28 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type]
+	if prefix == nil {
+		return nil
+	}
+
+	leftExp := prefix()
+
+	return leftExp
+}
+
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t
 }
@@ -135,4 +187,14 @@ func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
 		t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+}
+
+// registerPrefix registers a prefix function in the Parser for a token.TokenType
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+// registerInfix registers an infix function in the Parser for a token.TokenType
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
