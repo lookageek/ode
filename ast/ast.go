@@ -1,7 +1,10 @@
 package ast
 
-import "lookageek.com/ode/token"
-import "bytes"
+import (
+	"bytes"
+
+	"lookageek.com/ode/token"
+)
 
 // AST structure holds the two basic types of code lines, statements & expressions
 // statements do not evaluate and present back a value, expressions do
@@ -118,8 +121,13 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+// ExpressionStatement is the container for Expressions
+// which conforms to Statement interface because we want
+// to be able to put it into program.Statements
 type ExpressionStatement struct {
-	Token      token.Token
+	// Token IDENT, INT etc for an expression
+	Token token.Token
+	// Expression itself which can be Identifier, IntegerLiteral, PrefixExpression etc
 	Expression Expression
 }
 
@@ -141,9 +149,7 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func (il *IntegerLiteral) expressionNode()  {
-	
-}
+func (il *IntegerLiteral) expressionNode() {}
 
 func (il *IntegerLiteral) TokenLiteral() string {
 	return il.Token.Literal
@@ -151,4 +157,28 @@ func (il *IntegerLiteral) TokenLiteral() string {
 
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
+}
+
+// PrefixExpression is the prefix expression like "!foobar;"
+type PrefixExpression struct {
+	Token    token.Token // the prefix token like "!" or "-"
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode() {}
+
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
 }
