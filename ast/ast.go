@@ -209,3 +209,12 @@ func (e *InfixExpression) String() string {
 	return out.String()
 }
 
+// Boolean is the boolean value, any boolean is an expression
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (b *Boolean) expressionNode()      {}
+func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
+func (b *Boolean) String() string       { return b.Token.Literal }
