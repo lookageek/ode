@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"lookageek.com/ode/repl"
 	"os"
 	"os/user"
+
+	"lookageek.com/ode/repl"
 )
 
 func main() {
