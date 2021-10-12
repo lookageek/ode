@@ -53,6 +53,7 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+// Identifier node holds the identifier -> variable name, function name
 type Identifier struct {
 	Token token.Token // the token.IDENT token
 	Value string
@@ -145,6 +146,7 @@ func (es *ExpressionStatement) String() string {
 	return ""
 }
 
+// IntegerLiteral just holds the integer
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64

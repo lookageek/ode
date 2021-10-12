@@ -8,6 +8,7 @@ import (
 	"lookageek.com/ode/repl"
 )
 
+// main method is the entrypoint for the REPL interface
 func main() {
 	currentUser, err := user.Current()
 	if err != nil {

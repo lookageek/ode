@@ -20,6 +20,7 @@ const (
 	CALL
 )
 
+// precedences of the operators
 var precedences = map[token.TokenType]int{
 	token.EQ:          EQUALS,
 	token.NOTEQ:       EQUALS,
@@ -117,7 +118,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 // parseStatement parses all the statements in a switch case kind of fashion
-//
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:

@@ -12,16 +12,21 @@ import (
 
 const PROMPT = ">> "
 
+// REPL Start function is an endless loop waiting on input
+// at the terminal and press of enter key
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
 	for {
 		fmt.Fprintf(out, PROMPT)
+		// wait for code to be entered in the terminal
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
+		// when code is entered and enter is pressed, start the
+		// processing of that value
 		line := scanner.Text()
 		lex := lexer.New(line)
 		p := parser.New(lex)
