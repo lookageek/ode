@@ -11,6 +11,8 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
+// Eval function is the entry point to which the parsed AST node is passed
+// it walks the tree recursively and evaluated the nodes
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 
@@ -45,6 +47,10 @@ func Eval(node ast.Node) object.Object {
 	return nil
 }
 
+// evalIfExpression evaluates an IfExpression node
+// it first evaluates the condition in the IfExpression and
+// if true evaluates the Consequence BlockStatement or else
+// evaluates the Alternative BlockStatement
 func evalIfExpression(ie *ast.IfExpression) object.Object {
 	condition := Eval(ie.Condition)
 
@@ -70,6 +76,8 @@ func isTruthy(obj object.Object) bool {
 	}
 }
 
+// evalStatements takes a slice of Statement nodes and evaluates them one
+// by one
 func evalStatements(stmts []ast.Statement) object.Object {
 	var result object.Object
 
@@ -80,6 +88,7 @@ func evalStatements(stmts []ast.Statement) object.Object {
 	return result
 }
 
+// converts the literal boolean to a Boolean Object
 func nativeBooleanToBooleanObject(input bool) *object.Boolean {
 	if input {
 		return TRUE
@@ -88,6 +97,7 @@ func nativeBooleanToBooleanObject(input bool) *object.Boolean {
 	return FALSE
 }
 
+// evalPrefixExpression evals a prefix expression which consists of ! or - expression
 func evalPrefixExpression(operator string, right object.Object) object.Object {
 	switch operator {
 	case "!":
@@ -121,10 +131,15 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	return &object.Integer{Value: -value}
 }
 
+// evalInfixExpression evals normal math operators +, -, *, /
+// also comparision operators of ==, !=, <, >, for integer operands
+// and == & != for boolean operands
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
+	// take care of operands being integers in either math operators or in boolean operators
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	// now operands can only be boolean object hence create boolean object with native comparision
 	case operator == "==":
 		return nativeBooleanToBooleanObject(left == right)
 	case operator == "!=":
@@ -134,6 +149,7 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	}
 }
 
+// evalIntegerInfixExpression handles evaluating both math operators and comparision operators
 func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value

@@ -10,11 +10,13 @@ const (
 	NULL_OBJ    = "NULL"
 )
 
+// Object holds the literal values for integer, boolean and null
 type Object interface {
 	Type() ObjectType
 	Inspect() string
 }
 
+// Integer holds the literal integer value
 type Integer struct {
 	Value int64
 }
@@ -22,6 +24,7 @@ type Integer struct {
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 
+// Boolean holds the literal boolean value
 type Boolean struct {
 	Value bool
 }
@@ -29,6 +32,7 @@ type Boolean struct {
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 
+// Null holds nothing
 type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL_OBJ }
