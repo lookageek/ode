@@ -214,6 +214,9 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	// take care of operands being integers in either math operators or in boolean operators
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	// operands being strings, we support string concatenation with operator +
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
 	// now operands can only be boolean object hence create boolean object with native comparision
 	case operator == "==":
 		return nativeBooleanToBooleanObject(left == right)
@@ -254,6 +257,16 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		// in default case where operator symbol is not any of the above results in an evaluation error
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return &object.String{Value: leftVal + rightVal}
 }
 
 func evalIdentifier(
