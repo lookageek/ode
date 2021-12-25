@@ -29,6 +29,7 @@ const (
 	RETURN      = "RETURN"
 	EQ          = "=="
 	NOTEQ       = "!="
+	STRING      = "STRING"
 )
 
 type TokenType string

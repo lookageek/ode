@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+
 	"lookageek.com/ode/ast"
 	"lookageek.com/ode/object"
 )
@@ -82,6 +83,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		params := node.Parameters
 		body := node.Body
 		return &object.Function{Parameters: params, Env: env, Body: body}
+
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	}
 
 	return nil
@@ -255,7 +259,7 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 func evalIdentifier(
 	node *ast.Identifier,
 	env *object.Environment,
-	) object.Object {
+) object.Object {
 	val, ok := env.Get(node.Value)
 	if !ok {
 		return newError("identifier not found: " + node.Value)

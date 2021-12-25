@@ -249,7 +249,7 @@ if (10 > 1) {
 
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected int64
 	}{
 		{"let a = 5; a;", 5},
@@ -284,5 +284,19 @@ func TestFunctionObject(t *testing.T) {
 
 	if fn.Body.String() != expectedBody {
 		t.Fatalf("body is not %q. got = %q", expectedBody, fn.Body.String())
+	}
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got = %T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has the wrong value. got = %q", str.Value)
 	}
 }

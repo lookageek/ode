@@ -3,8 +3,9 @@ package object
 import (
 	"bytes"
 	"fmt"
-	"lookageek.com/ode/ast"
 	"strings"
+
+	"lookageek.com/ode/ast"
 )
 
 type ObjectType string
@@ -16,6 +17,7 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
+	STRING_OBJ       = "STRING"
 )
 
 // Object holds the literal values for integer, boolean and null
@@ -97,8 +99,8 @@ func (e *Environment) Set(name string, val Object) Object {
 // it needs its own env because of scope rules of variables in a function
 type Function struct {
 	Parameters []*ast.Identifier
-	Body *ast.BlockStatement
-	Env *Environment
+	Body       *ast.BlockStatement
+	Env        *Environment
 }
 
 func (f *Function) Type() ObjectType {
@@ -123,4 +125,10 @@ func (f *Function) Inspect() string {
 	return out.String()
 }
 
+// String object representing the string literal in the ode object system
+type String struct {
+	Value string
+}
 
+func (s *String) Type() ObjectType { return STRING_OBJ }
+func (s *String) Inspect() string  { return s.Value }

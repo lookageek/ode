@@ -326,3 +326,15 @@ func (ce *CallExpression) String() string {
 
 	return out.String()
 }
+
+// StringLiteral node in AST holds the literal value
+// of the string, it is an expression node as literal
+// has to evaluate to a string
+type StringLiteral struct {
+	Token token.Token
+	Value string
+}
+
+func (sl *StringLiteral) expressionNode()      {}
+func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
+func (sl *StringLiteral) String() string       { return sl.Token.Literal }
