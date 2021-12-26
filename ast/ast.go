@@ -298,7 +298,7 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
-// CallExpression is the function call refering to the identifier
+// CallExpression is the function call referring to the identifier
 // holding the function which returns the value computed out of the function call
 type CallExpression struct {
 	Token token.Token
