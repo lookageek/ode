@@ -9,6 +9,7 @@ import (
 )
 
 type ObjectType string
+type BuiltinFunction func(args ...Object) Object
 
 const (
 	INTEGER_OBJ      = "INTEGER"
@@ -18,6 +19,7 @@ const (
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
 	STRING_OBJ       = "STRING"
+	BUILTIN_OBJ      = "BUILTIN"
 )
 
 // Object holds the literal values for integer, boolean and null
@@ -132,3 +134,12 @@ type String struct {
 
 func (s *String) Type() ObjectType { return STRING_OBJ }
 func (s *String) Inspect() string  { return s.Value }
+
+// Builtin defined the built-in functions of the language
+// sort-of standard library
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string  { return "builtin function" }
