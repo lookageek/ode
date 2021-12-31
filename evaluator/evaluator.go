@@ -99,6 +99,26 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return applyFunction(function, args)
+
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
+
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		return evalIndexExpression(left, index)
 	}
 
 	return nil
@@ -158,6 +178,8 @@ func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 	return result
 }
 
+// evalBlockStatement evaluates the block statement having multiple statements surrounded
+// by curly braces
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 
@@ -197,6 +219,7 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	}
 }
 
+// evalBangOperatorExpression evaluates the "!" prefix operator expression
 func evalBangOperatorExpression(right object.Object) object.Object {
 	switch right {
 	case TRUE:
@@ -210,6 +233,7 @@ func evalBangOperatorExpression(right object.Object) object.Object {
 	}
 }
 
+// evalMinusPrefixOperatorExpression evaluates the "-" prefix operator expression
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
 		return newError("unknown operator: -%s", right.Type())
@@ -349,6 +373,8 @@ func unwrapReturnValue(obj object.Object) object.Object {
 	return obj
 }
 
+// evalStringInfixExpression supports string concatenation with "+" operator, only "+" operator is
+// supported for strings
 func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
 	if operator != "+" {
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
@@ -370,4 +396,27 @@ func isError(obj object.Object) bool {
 	}
 
 	return false
+}
+
+// evalIndexExpression evaluates only if the left side of index expression
+// is an array & right side of expression is an integer
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("index operator not supported: %s", left.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	if idx < 0 || idx > max {
+		return NULL
+	}
+
+	return arrayObject.Elements[idx]
 }
