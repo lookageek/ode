@@ -30,6 +30,8 @@ const (
 	EQ          = "=="
 	NOTEQ       = "!="
 	STRING      = "STRING"
+	LBRACKET    = "["
+	RBRACKET    = "]"
 )
 
 type TokenType string
