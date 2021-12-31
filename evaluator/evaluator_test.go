@@ -231,6 +231,7 @@ if (10 > 1) {
 		},
 		{"foobar", "identifier not found: foobar"},
 		{`"Hello" - "World"`, "unknown operator: STRING - STRING"},
+		{"999[1]", "index operator not supported: INTEGER"},
 	}
 
 	for _, tt := range tests {
