@@ -342,7 +342,7 @@ func (sl *StringLiteral) String() string       { return sl.Token.Literal }
 // ArrayLiteral holds the array which can have any kind of object
 // as its elements, hence a heterogeneous container
 type ArrayLiteral struct {
-	Token token.Token // the '[' token
+	Token    token.Token // the '[' token
 	Elements []Expression
 }
 
@@ -361,6 +361,31 @@ func (al *ArrayLiteral) String() string {
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
+
+	return out.String()
+}
+
+// IndexExpression is the node to hold on to this expression
+// myArray[1], [1, 2, 3, 4, 5][1], functionCall()[1]
+// basically an <expression>[<expression>]
+type IndexExpression struct {
+	Token token.Token // here too we will just use the [ token
+	Left  Expression  // this expression should evaluate to an array node
+	Index Expression  // this can just be an integer or any expression evaluating to integer for indexing into array
+}
+
+func (ie *IndexExpression) expressionNode() {}
+func (ie *IndexExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
 
 	return out.String()
 }

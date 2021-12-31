@@ -18,6 +18,7 @@ const (
 	PRODUCT
 	PREFIX
 	CALL
+	INDEX
 )
 
 // precedences of the operators
@@ -31,6 +32,7 @@ var precedences = map[token.TokenType]int{
 	token.DIVIDE:      PRODUCT,
 	token.MULTIPLY:    PRODUCT,
 	token.LPAREN:      CALL,
+	token.LBRACKET:    INDEX,
 }
 
 // Parser has a reference to the lexer
@@ -86,7 +88,12 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOTEQ, p.parseInfixExpression)
 	p.registerInfix(token.GREATERTHAN, p.parseInfixExpression)
 	p.registerInfix(token.LESSTHAN, p.parseInfixExpression)
+	// we categorize the function call expression as an infix expression,
+	// with token.LPAREN - ( as the infix operator
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	// we categorize the array index lookup expression as an infix expression,
+	// for parsing purposes, with token.LBRACKET - [ as the infix operation
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -505,3 +512,18 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	return list
 }
 
+// parseIndexExpression parses the array index lookup expression by assuming
+// that it is an infix expression
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	// curToken is [ at this moment
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
+
+	p.nextToken()
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return exp
+}

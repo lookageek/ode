@@ -290,7 +290,7 @@ func TestFunctionObject(t *testing.T) {
 
 func TestFunctionApplication(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected int64
 	}{
 		{"let identity = fn(x) { x; }; identity(5);", 5},
