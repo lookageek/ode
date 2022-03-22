@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"lookageek.com/ode/object"
 
+	"lookageek.com/ode/compiler"
 	"lookageek.com/ode/evaluator"
 	"lookageek.com/ode/lexer"
+	"lookageek.com/ode/object"
 	"lookageek.com/ode/parser"
+	"lookageek.com/ode/vm"
 )
 
 const PROMPT = ">> "
@@ -45,6 +47,49 @@ func Start(in io.Reader, out io.Writer) {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}
+	}
+}
+
+func StartVm(in io.Reader, out io.Writer) {
+	scanner := bufio.NewScanner(in)
+
+	for {
+		fmt.Fprintf(out, PROMPT)
+		// wait for code to be entered in the terminal
+		scanned := scanner.Scan()
+		if !scanned {
+			return
+		}
+
+		// when code is entered and enter is pressed, start the
+		// processing of that value
+		line := scanner.Text()
+		lex := lexer.New(line)
+		p := parser.New(lex)
+
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParseErrors(out, p.Errors())
+			continue
+		}
+
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Compilation failed:\n%s\n", err)
+			continue
+		}
+
+		machine := vm.New(comp.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n%s\n", err)
+			continue
+		}
+
+		stackTop := machine.StackTop()
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
 	}
 }
 

@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"lookageek.com/ode/ast"
 	"lookageek.com/ode/code"
 	"lookageek.com/ode/object"
@@ -52,6 +54,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		err = c.Compile(node.Right)
 		if err != nil {
 			return err
+		}
+
+		switch node.Operator {
+		case "+":
+			c.emit(code.OpAdd)
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 
 	case *ast.IntegerLiteral:

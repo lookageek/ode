@@ -16,5 +16,5 @@ func main() {
 	}
 	fmt.Printf("Hello %s! This is the Ode programming language!\n", currentUser.Username)
 	fmt.Printf("Feel free to type some commands\n")
-	repl.Start(os.Stdin, os.Stdout)
+	repl.StartVm(os.Stdin, os.Stdout)
 }
